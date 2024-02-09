@@ -36,20 +36,16 @@ def get_logger() -> logging.Logger:
 
 def get_db() -> mysql.connector.connection.MySQLConnection:
     """ Returns a connector to a MySQL database """
-    try:
-        username = environ.get("PERSONAL_DATA_DB_USERNAME", "root")
-        password = environ.get("PERSONAL_DATA_DB_PASSWORD", "")
-        host = environ.get("PERSONAL_DATA_DB_HOST", "localhost")
-        db_name = environ.get("PERSONAL_DATA_DB_NAME")
+    username = environ.get("PERSONAL_DATA_DB_USERNAME", "root")
+    password = environ.get("PERSONAL_DATA_DB_PASSWORD", "")
+    host = environ.get("PERSONAL_DATA_DB_HOST", "localhost")
+    db_name = environ.get("PERSONAL_DATA_DB_NAME")
 
-        cnx = mysql.connector.connect(user=username,
-                                      password=password,
-                                      host=host,
-                                      database=db_name)
-        return cnx
-    except mysql.connector.Error as err:
-        print(f"Error: {err}")
-        raise
+    cnx = mysql.connector.connection.MySQLConnection(user=username,
+                                                     password=password,
+                                                     host=host,
+                                                     database=db_name)
+    return cnx
 
 
 def main():
@@ -57,21 +53,19 @@ def main():
     Obtain a database connection using get_db and retrieves all rows
     in the users table and display each row under a filtered format
     """
-    try:
-        db = get_db()
-        cursor = db.cursor()
-        cursor.execute("SELECT * FROM users;")
-        field_names = [i[0] for i in cursor.description]
+    db = get_db()
+    cursor = db.cursor()
+    cursor.execute("SELECT * FROM users;")
+    field_names = [i[0] for i in cursor.description]
 
-        logger = get_logger()
+    logger = get_logger()
 
-        for row in cursor:
-            str_row = ''.join(f'{f}={str(r)}; ' for r, f in zip(row, field_names))
-            logger.info(str_row.strip())
+    for row in cursor:
+        str_row = ''.join(f'{f}={str(r)}; ' for r, f in zip(row, field_names))
+        logger.info(str_row.strip())
 
-    finally:
-        cursor.close()
-        db.close()
+    cursor.close()
+    db.close()
 
 
 class RedactingFormatter(logging.Formatter):
@@ -95,4 +89,3 @@ class RedactingFormatter(logging.Formatter):
 
 if __name__ == '__main__':
     main()
-
